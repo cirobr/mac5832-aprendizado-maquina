@@ -124,6 +124,10 @@ def normal_equation_weights(X, y):
     X1 = inv(np.dot(Xt, X))
     X2 = np.dot(X1, Xt)
     w = np.dot(X2, y)
+    
+    b = np.array(0).astype("float32")
+    w = np.append(b, w).astype("float32")
+    w = w.reshape(X.shape[1]+1, 1)
     return(w)
     
     # END OF YOUR CODE
@@ -150,10 +154,9 @@ def normal_equation_prediction(X, w):
     
     # START OF YOUR CODE:
     #raise NotImplementedError("Function normal_equation_prediction() is not implemented")
-    number_of_predictors = X.shape[1]
-    X1 = np.ones((1, number_of_predictors), dtype=np.float32)
-    X_til = np.append(X1, X)
-    X_til = X_til.reshape(X_til.shape[0], number_of_predictors)
+    X_1 = np.ones((1, X.shape[1])).astype("float32")
+    X_til = np.append(X_1, X)
+    X_til = X_til.reshape(X.shape[0]+1,X.shape[1])
     y = np.dot(w.T, X_til)
     
     return(y)
