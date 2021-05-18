@@ -118,18 +118,20 @@ def normal_equation_weights(X, y):
     
     # START OF YOUR CODE:
     #raise NotImplementedError("Function normal_equation_weights() is not implemented")
+    
     import numpy as np
     from numpy.linalg import inv
-    Xt = X.T
-    X1 = inv(np.dot(Xt, X))
-    X2 = np.dot(X1, Xt)
-    w = np.dot(X2, y)
+    N = X.shape[0]
+    #d = X.shape[1]
+    X_0 = np.ones((N,1))                # false X_0 coordinate
+    X_til = np.append(X_0, X, axis=1)   # insert false coordinate to X
+    X_til = X_til.astype("float32")
+    Xt = X_til.T
+    X_aux = inv(np.dot(Xt, X_til))
+    X_cross = np.dot(X_aux, Xt)
+    w = np.dot(X_cross, y)
     
-    b = np.array(0).astype("float32")
-    w = np.append(b, w).astype("float32")
-    w = w.reshape(X.shape[1]+1, 1)
     return(w)
-    
     # END OF YOUR CODE
     
 # test of function normal_equation_weights()
@@ -137,6 +139,7 @@ def normal_equation_weights(X, y):
 w = 0  # this is not necessary
 w = normal_equation_weights(X, y)
 print("Estimated w =\n", w)
+
 
 def normal_equation_prediction(X, w):
     """
@@ -148,18 +151,50 @@ def normal_equation_prediction(X, w):
     :type X: np.ndarray(shape=(N, d))
     :param w: weight vector
     :type w: np.ndarray(shape=(d+1, 1))
-    :param y: regression prediction
-    :type y: np.ndarray(shape=(N, 1))
+    :param y_hat: regression prediction
+    :type y_hat: np.ndarray(shape=(N, 1))
     """
     
     # START OF YOUR CODE:
     #raise NotImplementedError("Function normal_equation_prediction() is not implemented")
-    X_1 = np.ones((1, X.shape[1])).astype("float32")
-    X_til = np.append(X_1, X)
-    X_til = X_til.reshape(X.shape[0]+1,X.shape[1])
-    y = np.dot(w.T, X_til)
     
-    return(y)
+    N = X.shape[0]
+    #d = X.shape[1]
+    
+    X_0 = np.ones((N,1))                # false X_0 coordinate
+    X_til = np.append(X_0, X, axis=1)   # insert false coordinate to X
+    X_til = X_til.astype("float32")
+
+    y_hat = np.multiply(w.T, X_til)     # multiplica cada elemento de w.T por coluna em X_till
+    yh0 = y_hat[:,0].reshape((N, 1))
+    yh1 = y_hat[:,1:]
+    y_hat = yh0 + yh1
+    
+    return(y_hat)
+
     # END OF YOUR CODE
 
-normal_equation_prediction(X, w)
+from sklearn.metrics import r2_score
+
+# test of function normal_equation_prediction()
+prediction = normal_equation_prediction(X, w)
+
+# compute the R2 score using the r2_score function from sklearn
+# Replace 0 with an appropriate call of the function
+
+# START OF YOUR CODE:
+#r_2 = 0
+
+r_2 = r2_score(y_true=y,
+               y_pred=prediction)
+
+# END OF YOUR CODE
+
+plot_points_regression(X,
+                       y,
+                       title='Real estate prices prediction',
+                       xlabel="m\u00b2",
+                       ylabel='$',
+                       prediction=prediction,
+                       legend=True,
+                       r_squared=r_2)
