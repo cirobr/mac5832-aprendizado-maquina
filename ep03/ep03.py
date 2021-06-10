@@ -17,9 +17,8 @@ def prd(w, X, y):
     computes the product of y.wt.X
     return res: shape=(N, 1)
     """
-    w1 = np.reshape(w, (w.shape[0], 1))
-    wt = np.transpose(w1)
-    p2 = np.inner(wt, X)
+    Xt = np.transpose(X)
+    p2 = np.dot(w, Xt)
     res = np.multiply(y, p2)
     
     return(res)
@@ -58,13 +57,47 @@ def cross_entropy_gradient(w, X, y):
     :return grad: gradient (equation 2)
     :rtype: float
     """
+    N = X.shape[0]
+    
+    numerator = np.dot(w, np.transpose(X))
+
     arg1 = prd(w, X, y)
-    numerator = np.multiply(w, X)
-    denominator = np.ones((X.shape[0],)) + np.exp(arg1)
+    denominator = np.ones((N,)) + np.exp(arg1)
     arg2 = np.divide(numerator, denominator)
-    grad = np.mean(arg2)
+    grad = -np.mean(arg2)
     
     return(grad)
+
+
+# 1.3 Logistic regression training
+def train_logistic(X, y, learning_rate = 1e-1, w0 = None,\
+                        num_iterations = 1000, return_history = False):
+    """
+    Computes the weight vector applying the gradient descent technique
+    :param X: design matrix
+    :type X: np.ndarray(shape=(N, d))
+    :param y: class label
+    :type y: np.ndarray(shape=(N, ))
+    :return: weight vector
+    :rtype: np.ndarray(shape=(1+d, ))
+    :return: the history of loss values (optional)
+    :rtype: list of float
+    """    
+    
+    N = X.shape[0]
+    d = X.shape[1]
+    ones = np.ones((N,1))
+    X_one = np.hstack((ones, X))
+    
+    if w0 == None:
+        w0 = np.random.normal(loc = 0, scale = 1, size = d)
+
+    
+
+
+
+
+
 
 # Create two blobs
 N = 300
@@ -77,3 +110,5 @@ print("X.shape =", X.shape, "  y.shape =", y.shape)
 
 w = np.ones((2,))
 res = prd(w, X, y)
+grad = cross_entropy_gradient(w,X,y)
+train_logistic(X, y)
