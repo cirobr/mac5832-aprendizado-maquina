@@ -91,7 +91,7 @@ def train_logistic(X, y, learning_rate = 1e-1, w0 = None,\
     X_one = np.hstack((ones, X))
     
     if w0 == None:
-        w0 = np.random.normal(loc = 0, scale = 1, size = d)
+        w0 = np.random.normal(loc = 0, scale = 1, size = d+1)
 
     cross_entropy_loss_history = np.empty(shape=(0,), dtype=float)
     for t in range(num_iterations):
@@ -132,8 +132,12 @@ def predict_logistic(X, w):
     :rtype: np.ndarray(shape=(N,))
     """
     
-    wt = np.transpose(w)
-    h = sigmoid(np.dot(wt, X))
+    N = X.shape[0]
+    ones = np.ones((N,1))
+    X_one = np.hstack((ones, X))
+    Xt = np.transpose(X_one)
+
+    h = sigmoid(np.dot(w, Xt))
     
     return (h)
 
@@ -184,7 +188,9 @@ np.random.seed(567)
 # train_logistic() function defined above. Use parameter return_history=True
 
 #w_logistic, loss = np.array([0,0,0]), [0]
-w_logistic, loss = train_logistic(X, y)
+w_logistic, loss = train_logistic(X, y, \
+                                  num_iterations = 50, \
+                                  return_history = True)
 
 # ==> Your code insert ends here
 
@@ -197,4 +203,45 @@ plt.figure(figsize = (12, 8))
 plt.plot(loss)
 plt.xlabel('Iteration #')
 plt.ylabel('Cross Entropy Loss')
+plt.show()
+
+
+# 2.4. Now, let's plot the decision boundary
+x1min = min(X[:,0])
+x1max = max(X[:,0])
+x2min = min(X[:,1])
+x2max = max(X[:,1])
+
+y_pred = predict_logistic(X, w_logistic)
+
+fig = plt.figure(figsize=(12,6))
+ax1 = fig.add_subplot(121)
+ax1.set_title("Ground-truth")
+
+# plot negatives in red
+ax1.scatter(X[y==-1,0], \
+            X[y==-1,1], \
+            alpha = 0.5, \
+            c = 'red')
+
+# and positives in blue
+ax1.scatter(x=X[y==1,0], \
+            y=X[y==1,1], \
+            alpha = 0.5, \
+            c = 'blue')
+
+ax2 = fig.add_subplot(122)
+
+ax2.set_title("Prediction")
+ax2.scatter(x = X[:,0], y = X[:,1], c = -y_pred, cmap = 'coolwarm')
+ax2.legend(handles=legend_elements, loc='best')
+ax2.set_xlim([x1min-1, x1max+1])
+ax2.set_ylim([x2min-1, x2max+1])
+
+p1 = (x1min, -(w_logistic[0] + (x1min)*w_logistic[1])/w_logistic[2])
+p2 = (x1max, -(w_logistic[0] + (x1max)*w_logistic[1])/w_logistic[2])
+
+lines = ax2.plot([p1[0], p2[0]], [p1[1], p2[1]], '-')
+plt.setp(lines, color='g', linewidth=4.0)
+
 plt.show()
