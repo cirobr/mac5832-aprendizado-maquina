@@ -87,7 +87,7 @@ print("\nShape of X_Dtrain: ", X_Dtrain.shape)
 print("Shape of X_Dval: ", X_Dval.shape)
 print("Shape of X_test: ", X_test.shape)
 
-# verificar a correta estratificação de Dtrain e Dval
+# check for stratification in Dtrain and Dval
 unique_t, counts_t = np.unique(y_Dtrain, return_counts=True)
 unique_v, counts_v = np.unique(y_Dval, return_counts=True)
 
@@ -106,63 +106,61 @@ plt.show()
 
 # 2. Training, evaluating and selecting models
 
-# bibliotecas
+# libraries
 from sklearn.linear_model import LogisticRegression
 from sklearn.neural_network import MLPClassifier
 from sklearn.decomposition import PCA
 from sklearn.svm import SVC
 
+from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.metrics import f1_score
-from sklearn.metrics import confusion_matrix
 
 
-# instâncias dos modelos
+# instantiating models
 logistic_regression = LogisticRegression(max_iter = 400)
 mlp_classifier = MLPClassifier()
+svm = SVC()
+
+# printing of performance results
+def print_report(y_true, y_hat):
+    cm = confusion_matrix(y_true, y_hat, labels = unique_t)
+    print("\n", cm)
+    
+    cr = classification_report(y_true, y_hat, labels = unique_t, digits=3)
+    print("\n", cr)
+    
+    f1 = f1_score(y_true, y_hat, labels = unique_t, average = "micro")
+    print("f1-score: ", format(f1, ".3f"))
+    
+    return
 
 
-# 2.1 treinamento e avaliação da regressão logística
+# 2.1 logistic regression model
 logistic_regression.fit(X_Dtrain, y_Dtrain)
 y_hat = logistic_regression.predict(X_Dtrain)
 
-cm = confusion_matrix(y_Dtrain, y_hat, labels = unique_t)
-print("\n",cm)
-
-cr = classification_report(y_Dtrain, y_hat, labels = unique_t, digits=3)
-print(cr)
-
-f1 = f1_score(y_Dtrain, y_hat, labels = unique_t, average = "micro")
-print(format(f1, ".3f"))
+print_report(y_Dtrain, y_hat)
 
 
-# 2.2 treinamento e avaliação de rede neural
+# 2.2 neural network model
 mlp_classifier.fit(X_Dtrain, y_Dtrain)
 y_hat = mlp_classifier.predict(X_Dtrain)
 
-cm = confusion_matrix(y_Dtrain, y_hat, labels = unique_t)
-print("\n",cm)
-
-cr = classification_report(y_Dtrain, y_hat, labels = unique_t, digits=3)
-print(cr)
-
-f1 = f1_score(y_Dtrain, y_hat, labels = unique_t, average = "micro")
-print(format(f1, ".3f"))
+print_report(y_Dtrain, y_hat)
 
 
-# 2.3 Training a SVM model
+# 2.3 SVM model
 
 # 2.3.1 PCA
-pca = PCA(svd_solver='randomized', whiten=True).fit(X_Dtrain)
+pca = PCA(n_components=10, svd_solver='randomized', whiten=True).fit(X_Dtrain)
 
 X_Dtrain_pca = pca.transform(X_Dtrain)
 X_Dval_pca = pca.transform(X_Dval)
 
 # 2.3.2 SVM
-svm = SVC(kernel='rbf', class_weight='balanced')
 svm = svm.fit(X_Dtrain_pca, y_Dtrain)
-y_hat = svm.predict(X_Dtrain)
+y_hat = svm.predict(X_Dtrain_pca)
 
-### confusion matrix está tão ruim que os parâmetros do modelo precisam ser revistos
-cm = confusion_matrix(y_Dtrain, y_hat, labels = unique_t)
-print("\n",cm)
+print_report(y_Dtrain, y_hat)
+
