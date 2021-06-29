@@ -74,10 +74,10 @@ print("Maximum value in X_test:", np.amax(X_test))
 
 
 # 1. Dataset preparation
-# Dividir o trainset original em Dtrain / Dval (70 / 30)
+# Split the original trainset in Dtrain / Dval (70 / 30)
 from sklearn.model_selection import train_test_split
 
-seed = 42
+seed = 42   # fix seed to make results repeatable
 X_Dtrain, X_Dval, y_Dtrain, y_Dval = train_test_split(X_train,
                                                     y_train,
                                                     test_size=0.30,
@@ -87,7 +87,7 @@ print("\nShape of X_Dtrain: ", X_Dtrain.shape)
 print("Shape of X_Dval: ", X_Dval.shape)
 print("Shape of X_test: ", X_test.shape)
 
-# Verificar a correta estratificação de Dtrain e Dval
+# verificar a correta estratificação de Dtrain e Dval
 unique_t, counts_t = np.unique(y_Dtrain, return_counts=True)
 unique_v, counts_v = np.unique(y_Dval, return_counts=True)
 
@@ -104,57 +104,65 @@ plt.ylabel('Frequency')
 plt.show()
 
 
-
 # 2. Training, evaluating and selecting models
 
 # bibliotecas
 from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPClassifier
+from sklearn.decomposition import PCA
+from sklearn.svm import SVC
 
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+from sklearn.metrics import f1_score
 from sklearn.metrics import confusion_matrix
 
 
-# criar instâncias dos modelos
-logistic_regression = LogisticRegression()
-
-# criar funções para medida de mérito dos modelos classificadores
-def accuracy(estimator, X, y):
-    estimator.fit(X, y)
-    y_hat = estimator.predict(X)
-    acc = accuracy_score(y, y_hat)
-    return acc
+# instâncias dos modelos
+logistic_regression = LogisticRegression(max_iter = 400)
+mlp_classifier = MLPClassifier()
 
 
-# 2.1 Training a logistic regression model
-#res_log = accuracy(logistic_regression, X_Dtrain, y_Dtrain)
-#print("\nLogistic Regression score:", "{:.3f}".format(res_log))
-
-logistic_regression.fit(X_Dtrain, y_Dtrain)   # estudar, está falhando
+# 2.1 treinamento e avaliação da regressão logística
+logistic_regression.fit(X_Dtrain, y_Dtrain)
 y_hat = logistic_regression.predict(X_Dtrain)
-acc = confusion_matrix(y_Dtrain, y_hat, labels = labels)
+
+cm = confusion_matrix(y_Dtrain, y_hat, labels = unique_t)
+print("\n",cm)
+
+cr = classification_report(y_Dtrain, y_hat, labels = unique_t, digits=3)
+print(cr)
+
+f1 = f1_score(y_Dtrain, y_hat, labels = unique_t, average = "micro")
+print(format(f1, ".3f"))
 
 
+# 2.2 treinamento e avaliação de rede neural
+mlp_classifier.fit(X_Dtrain, y_Dtrain)
+y_hat = mlp_classifier.predict(X_Dtrain)
+
+cm = confusion_matrix(y_Dtrain, y_hat, labels = unique_t)
+print("\n",cm)
+
+cr = classification_report(y_Dtrain, y_hat, labels = unique_t, digits=3)
+print(cr)
+
+f1 = f1_score(y_Dtrain, y_hat, labels = unique_t, average = "micro")
+print(format(f1, ".3f"))
 
 
-# 2.2 Optimizing the logistic regression model
+# 2.3 Training a SVM model
 
+# 2.3.1 PCA
+pca = PCA(svd_solver='randomized', whiten=True).fit(X_Dtrain)
 
+X_Dtrain_pca = pca.transform(X_Dtrain)
+X_Dval_pca = pca.transform(X_Dval)
 
+# 2.3.2 SVM
+svm = SVC(kernel='rbf', class_weight='balanced')
+svm = svm.fit(X_Dtrain_pca, y_Dtrain)
+y_hat = svm.predict(X_Dtrain)
 
-# 2.3 Training a NN model
-
-
-
-
-# 2.4 Optimizing a NN model
-
-
-
-
-# 2.5 Training a SVM model
-
-
-
-
-# 2.6 Optimizing a SVM model
-
+### confusion matrix está tão ruim que os parâmetros do modelo precisam ser revistos
+cm = confusion_matrix(y_Dtrain, y_hat, labels = unique_t)
+print("\n",cm)
