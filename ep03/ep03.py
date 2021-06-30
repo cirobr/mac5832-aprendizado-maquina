@@ -60,12 +60,14 @@ def cross_entropy_gradient(w, X, y):
     """
     N = X.shape[0]
     
-    numerator = np.dot(w, np.transpose(X))
-
-    arg1 = prd(w, X, y)
-    denominator = np.ones((N,)) + np.exp(arg1)
-    arg2 = np.divide(numerator, denominator)
-    grad = -np.mean(arg2)
+    Xt = np.transpose(X)
+    numerator = np.multiply(y, Xt)               # element-wise vetor y * linhas de Xt
+    
+    arg2 = prd(w, X, y)
+    denominator = np.ones((N,)) + np.exp(arg2)   # vetor 300 observações
+    
+    arg3 = np.divide(numerator, denominator)     # element-wise linhas num / vetor den
+    grad = -np.mean(arg3, axis=1)
     
     return(grad)
 
@@ -189,7 +191,7 @@ np.random.seed(567)
 
 #w_logistic, loss = np.array([0,0,0]), [0]
 w_logistic, loss = train_logistic(X, y, \
-                                  num_iterations = 50, \
+                                  num_iterations = 5000, \
                                   return_history = True)
 
 # ==> Your code insert ends here
