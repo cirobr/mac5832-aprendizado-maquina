@@ -116,11 +116,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.metrics import f1_score
 
+from sklearn.model_selection import GridSearchCV
 
-# instantiating models
-logistic_regression = LogisticRegression(max_iter = 400)
-mlp_classifier = MLPClassifier()
-svm = SVC()
 
 # printing of performance results
 def print_report(y_true, y_hat):
@@ -136,31 +133,46 @@ def print_report(y_true, y_hat):
     return
 
 
-# 2.1 logistic regression model
+# 2.1.1 logistic regression (basic)
+logistic_regression = LogisticRegression(max_iter = 400)
 logistic_regression.fit(X_Dtrain, y_Dtrain)
-y_hat = logistic_regression.predict(X_Dtrain)
+y_hat_log = logistic_regression.predict(X_Dtrain)
+print_report(y_Dtrain, y_hat_log)
 
-print_report(y_Dtrain, y_hat)
+# 2.1.2 logistic regression optimization
+parameters = {'max_iter': [400],
+              'tol': [1e-4, 0.5e-4, 1e-5],
+              'C': [1.0, 0.5, 0.25]
+              }
+logistic_regression = LogisticRegression()
+clf = GridSearchCV(logistic_regression, parameters, scoring=f1_score)
+clf = clf.fit(X_Dtrain, y_Dtrain)
+y_hat_log = clf.predict(X_Dtrain)
+
+print_report(y_Dtrain, y_hat_log)
 
 
 # 2.2 neural network model
+mlp_classifier = MLPClassifier()
 mlp_classifier.fit(X_Dtrain, y_Dtrain)
-y_hat = mlp_classifier.predict(X_Dtrain)
+y_hat_mlp = mlp_classifier.predict(X_Dtrain)
 
-print_report(y_Dtrain, y_hat)
+print_report(y_Dtrain, y_hat_mlp)
 
 
 # 2.3 SVM model
 
 # 2.3.1 PCA
-pca = PCA(n_components=10, svd_solver='randomized', whiten=True).fit(X_Dtrain)
+pca = PCA(n_components=10, svd_solver='randomized', whiten=True)
+pca = pca.fit(X_Dtrain)
 
 X_Dtrain_pca = pca.transform(X_Dtrain)
 X_Dval_pca = pca.transform(X_Dval)
 
 # 2.3.2 SVM
-svm = svm.fit(X_Dtrain_pca, y_Dtrain)
-y_hat = svm.predict(X_Dtrain_pca)
+svm_classifier = SVC()
+svm_classifier = svm_classifier.fit(X_Dtrain_pca, y_Dtrain)
+y_hat_svm = svm_classifier.predict(X_Dtrain_pca)
 
-print_report(y_Dtrain, y_hat)
+print_report(y_Dtrain, y_hat_svm)
 
