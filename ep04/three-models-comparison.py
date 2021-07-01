@@ -141,15 +141,17 @@ def print_report(y_true, y_hat):
     
     return
 
+
 """
-# 2.1.1 logistic regression model
+# logistic regression model
 logistic_regression = LogisticRegression(max_iter=400)
 logistic_regression.fit(X_Strain, y_Strain)
 y_hat_log = logistic_regression.predict(X_Sval)
 
 print_report(y_Sval, y_hat_log)
+"""
 
-# 2.1.2 logistic regression optimization
+# logistic regression optimization
 parameters = {'C': [1.0, 0.75, 0.5, 0.25]}
 logistic_regression = LogisticRegression(max_iter=400)
 clf = GridSearchCV(logistic_regression, parameters, scoring='f1_micro')
@@ -160,34 +162,35 @@ print_report(y_Sval, y_hat_log)
 print('best parameters: ', clf.best_params_)
 df_log = pd.DataFrame(clf.cv_results_)   # usar para debug do gridsearch
 
-
-# 2.2.1 neural network model
+"""
+# neural network model
 mlp_classifier = MLPClassifier()
 mlp_classifier.fit(X_Strain, y_Strain)
 y_hat_mlp = mlp_classifier.predict(X_Sval)
 
 print_report(y_Sval, y_hat_mlp)
 
-# 2.2.2 neural network optimization
+# neural network optimization
 parameters = {'hidden_layer_sizes': [80, 100],
               'solver': ['lbfgs', 'adam'],
               'learning_rate': ['constant', 'adaptive']}
 mlp_classifier = MLPClassifier()
 clf = GridSearchCV(mlp_classifier, parameters, scoring='f1_micro')
 clf = clf.fit(X_Strain, y_Strain)
-y_hat_log = clf.predict(X_Sval)
+y_hat_mlp = clf.predict(X_Sval)
 
-print_report(y_Sval, y_hat_log)
+print_report(y_Sval, y_hat_mlp)
 print('best parameters: ', clf.best_params_)
 df_mlp = pd.DataFrame(clf.cv_results_)   # usar para debug do gridsearch
 
-"""
-# 2.3 SVM model
 
-# 2.3.1 PCA
+# SVM model
 
+# PCA
+
+# returns the number of elements where its cumulative variance accounts
+# for up to 95% of the total variance
 def n_components_pca(v):
-    "returns the number of elements where its cumulative variance accounts for up to 95%"
     v = -np.sort(-v)
     v = np.cumsum(v)
     v = v <= 0.95
@@ -199,21 +202,25 @@ def n_components_pca(v):
 pca = PCA(svd_solver='randomized', whiten=True)
 pca = pca.fit(X_Strain)
 n_pca = n_components_pca(pca.explained_variance_ratio_)
+print("n_components definido como: ", n_pca)
 
+# final pca
 pca = PCA(n_components = n_pca, svd_solver='randomized', whiten=True)
 pca = pca.fit(X_Strain)
 X_Strain_pca = pca.transform(X_Strain)
 X_Sval_pca = pca.transform(X_Sval)
 
-# 2.3.2 SVM
+# SVM
 svm_classifier = SVC()
 svm_classifier = svm_classifier.fit(X_Strain_pca, y_Strain)
 y_hat_svm = svm_classifier.predict(X_Sval_pca)
 
 print_report(y_Sval, y_hat_svm)
 
-# 2.3.3 SVM optimization
-parameters = {'C': [1.0, 0.75, 0.5, 0.25]}
+# SVM optimization
+parameters = {'C': [1.0, 0.75, 0.5, 0.25],
+              'kernel': ['rbf', 'poly', 'sigmoid'],
+              'gamma': ['scale', 'auto']}
 svm_classifier = SVC()
 clf = GridSearchCV(svm_classifier, parameters, scoring='f1_micro')
 clf = clf.fit(X_Strain_pca, y_Strain)
@@ -222,3 +229,4 @@ y_hat_svm = clf.predict(X_Sval_pca)
 print_report(y_Sval, y_hat_svm)
 print('best parameters: ', clf.best_params_)
 df_svm = pd.DataFrame(clf.cv_results_)   # usar para debug do gridsearch
+"""
