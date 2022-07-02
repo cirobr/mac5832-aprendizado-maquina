@@ -1,5 +1,0 @@
-conda create -n tf tensorflow-gpu   # keras
-
-conda create -n aiml --clone tf
-conda activate aiml
-conda install numpy scikit-learn scikit-image matplotlib seaborn pandas

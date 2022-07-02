@@ -1,0 +1,2 @@
+conda create -n pyt pytorch torchvision torchaudio cudatoolkit -c pytorch
+

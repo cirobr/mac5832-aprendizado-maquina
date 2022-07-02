@@ -1,0 +1,3 @@
+conda create -n tf tensorflow-gpu keras
+conda activate tf
+conconda install numpy scikit-learn scikit-image matplotlib seaborn pandas
