@@ -1,3 +1,4 @@
 conda create -n tf tensorflow-gpu keras
+# conda create -n tf tensorflow keras
 conda activate tf
-conconda install numpy scikit-learn scikit-image matplotlib seaborn pandas
+conda install numpy scikit-learn scikit-image matplotlib seaborn pandas
